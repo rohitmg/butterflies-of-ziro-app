@@ -2,7 +2,7 @@ name: butterflies_of_ziro
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -30,12 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sqflite: ^2.3.0  # For SQLite database operations
+  sqflite: ^2.3.0 # For SQLite database operations
   path_provider: ^2.1.1 # To get the correct path for the database
   riverpod: ^2.4.5 # For state management
   flutter_riverpod: ^2.4.5 # Flutter-specific Riverpod package
   flutter_map: ^6.1.0 # For offline map visualization
   url_launcher: ^6.1.14 # For launching external URLs (e.g., in About section)
+  freezed_annotation: ^2.4.1 # Add this line
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -44,8 +45,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  sqflite_common_ffi: ^2.3.6 # Add this line
   mockito: ^5.4.2 # For mocking classes in tests
   build_runner: ^2.4.6 # For code generation
+  freezed: ^2.4.5 # Add this line
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -59,6 +62,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/db/butterflies.db
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
