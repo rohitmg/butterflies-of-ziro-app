@@ -65,8 +65,9 @@ case "$VARIANT" in
     ;;
 esac
 
-# Run build
+# Run build as your current user to avoid permission conflicts
 docker run --rm \
+  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_VOLUME" \
   -v "$BUILD_VOLUME" \
   -v "$GRADLE_VOLUME" \
@@ -79,5 +80,5 @@ docker run --rm \
     $BUILD_CMD
   "
 
-# Fix ownership of build folder
-sudo chown -R $USER:$USER build/
+# No need for sudo chown anymore!
+# sudo chown -R $USER:$USER build/
