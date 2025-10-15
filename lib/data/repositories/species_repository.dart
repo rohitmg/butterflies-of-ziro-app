@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:butterflies_of_ziro/data/models/species_model.dart';
+import 'package:butterflies_of_ziro/providers/filter_state.dart';
 
 class SpeciesRepository {
   Database? _database;
@@ -66,6 +67,84 @@ class SpeciesRepository {
 
     final result = await db.rawQuery(sql);
 
+    return result.map((map) => SpeciesModel.fromMap(map)).toList();
+  }
+
+  Future<List<SpeciesModel>> getFilteredSpecies(FilterState filters) async {
+    final db = await database;
+    final whereClauses = <String>[];
+    final whereArgs = <dynamic>[];
+
+    // This is the main fix: use a single, more robust if/else block
+    if (filters.genus != null) {
+      whereClauses.add('t.genus = ?');
+      whereArgs.add(filters.genus);
+    } else if (filters.tribe != null) {
+      whereClauses.add('t.tribe = ?');
+      whereArgs.add(filters.tribe);
+    } else if (filters.subfamily != null) {
+      whereClauses.add('t.subfamily = ?');
+      whereArgs.add(filters.subfamily);
+    } else if (filters.family != null) {
+      whereClauses.add('t.family = ?');
+      whereArgs.add(filters.family);
+    }
+
+    // Add other filters with AND operator
+    if (filters.season != null) {
+      whereClauses.add('s.season = ?');
+      whereArgs.add(filters.season);
+    }
+    if (filters.size != null) {
+      whereClauses.add('s.size = ?');
+      whereArgs.add(filters.size);
+    }
+    if (filters.habitat != null) {
+      whereClauses.add('s.habitat = ?');
+      whereArgs.add(filters.habitat);
+    }
+    if (filters.altitude != null) {
+      whereClauses.add('s.altitude = ?');
+      whereArgs.add(filters.altitude);
+    }
+
+    final whereString = whereClauses.isNotEmpty
+        ? 'WHERE ${whereClauses.join(' AND ')}'
+        : '';
+
+    final sql =
+        '''
+      SELECT
+          s.id,
+          s.common_name,
+          s.scientific_name,
+          s.season,
+          s.size,
+          s.habitat,
+          s.altitude,
+          s.description,
+          s.life_cycle,
+          s.host_plants,
+          t.family,
+          t.subfamily,
+          t.tribe,
+          t.genus,
+          GROUP_CONCAT(i.filename) AS filenames,
+          GROUP_CONCAT(p.name) AS photographers
+      FROM
+          Species AS s
+      LEFT JOIN
+          Taxonomy AS t ON s.taxonomy_id = t.id
+      LEFT JOIN
+          Images AS i ON s.id = i.species_id
+      LEFT JOIN
+          Photographers AS p ON i.photographer_id = p.id
+      $whereString
+      GROUP BY
+          s.id;
+    ''';
+
+    final result = await db.rawQuery(sql, whereArgs);
     return result.map((map) => SpeciesModel.fromMap(map)).toList();
   }
 

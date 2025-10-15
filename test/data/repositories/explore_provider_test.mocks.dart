@@ -8,6 +8,7 @@ import 'dart:async' as _i4;
 import 'package:butterflies_of_ziro/data/models/species_model.dart' as _i5;
 import 'package:butterflies_of_ziro/data/repositories/species_repository.dart'
     as _i3;
+import 'package:butterflies_of_ziro/providers/filter_state.dart' as _i6;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:sqflite/sqflite.dart' as _i2;
 
@@ -61,6 +62,18 @@ class MockSpeciesRepository extends _i1.Mock implements _i3.SpeciesRepository {
   _i4.Future<List<_i5.SpeciesModel>> getAllSpecies() =>
       (super.noSuchMethod(
             Invocation.method(#getAllSpecies, []),
+            returnValue: _i4.Future<List<_i5.SpeciesModel>>.value(
+              <_i5.SpeciesModel>[],
+            ),
+          )
+          as _i4.Future<List<_i5.SpeciesModel>>);
+
+  @override
+  _i4.Future<List<_i5.SpeciesModel>> getFilteredSpecies(
+    _i6.FilterState? filters,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFilteredSpecies, [filters]),
             returnValue: _i4.Future<List<_i5.SpeciesModel>>.value(
               <_i5.SpeciesModel>[],
             ),

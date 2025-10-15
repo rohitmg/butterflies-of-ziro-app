@@ -111,16 +111,18 @@ class __$$ExploreStateImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ExploreStateImpl implements _ExploreState {
+class _$ExploreStateImpl with DiagnosticableTreeMixin implements _ExploreState {
   const _$ExploreStateImpl({
-    required this.isLoading,
-    required final List<SpeciesModel> speciesList,
+    this.isLoading = true,
+    final List<SpeciesModel> speciesList = const [],
   }) : _speciesList = speciesList;
 
   @override
+  @JsonKey()
   final bool isLoading;
   final List<SpeciesModel> _speciesList;
   @override
+  @JsonKey()
   List<SpeciesModel> get speciesList {
     if (_speciesList is EqualUnmodifiableListView) return _speciesList;
     // ignore: implicit_dynamic_type
@@ -128,8 +130,17 @@ class _$ExploreStateImpl implements _ExploreState {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ExploreState(isLoading: $isLoading, speciesList: $speciesList)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ExploreState'))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('speciesList', speciesList));
   }
 
   @override
@@ -163,8 +174,8 @@ class _$ExploreStateImpl implements _ExploreState {
 
 abstract class _ExploreState implements ExploreState {
   const factory _ExploreState({
-    required final bool isLoading,
-    required final List<SpeciesModel> speciesList,
+    final bool isLoading,
+    final List<SpeciesModel> speciesList,
   }) = _$ExploreStateImpl;
 
   @override

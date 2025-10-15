@@ -8,7 +8,8 @@ import 'dart:async' as _i4;
 import 'package:butterflies_of_ziro/data/models/species_model.dart' as _i5;
 import 'package:butterflies_of_ziro/data/repositories/species_repository.dart'
     as _i3;
-import 'package:flutter/src/widgets/navigator.dart' as _i6;
+import 'package:butterflies_of_ziro/providers/filter_state.dart' as _i6;
+import 'package:flutter/src/widgets/navigator.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:sqflite/sqflite.dart' as _i2;
 
@@ -69,6 +70,18 @@ class MockSpeciesRepository extends _i1.Mock implements _i3.SpeciesRepository {
           as _i4.Future<List<_i5.SpeciesModel>>);
 
   @override
+  _i4.Future<List<_i5.SpeciesModel>> getFilteredSpecies(
+    _i6.FilterState? filters,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFilteredSpecies, [filters]),
+            returnValue: _i4.Future<List<_i5.SpeciesModel>>.value(
+              <_i5.SpeciesModel>[],
+            ),
+          )
+          as _i4.Future<List<_i5.SpeciesModel>>);
+
+  @override
   _i4.Future<_i5.SpeciesModel?> getSpeciesByScientificName(String? name) =>
       (super.noSuchMethod(
             Invocation.method(#getSpeciesByScientificName, [name]),
@@ -80,20 +93,20 @@ class MockSpeciesRepository extends _i1.Mock implements _i3.SpeciesRepository {
 /// A class which mocks [NavigatorObserver].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockNavigatorObserver extends _i1.Mock implements _i6.NavigatorObserver {
+class MockNavigatorObserver extends _i1.Mock implements _i7.NavigatorObserver {
   MockNavigatorObserver() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  void didPush(_i6.Route<dynamic>? route, _i6.Route<dynamic>? previousRoute) =>
+  void didPush(_i7.Route<dynamic>? route, _i7.Route<dynamic>? previousRoute) =>
       super.noSuchMethod(
         Invocation.method(#didPush, [route, previousRoute]),
         returnValueForMissingStub: null,
       );
 
   @override
-  void didPop(_i6.Route<dynamic>? route, _i6.Route<dynamic>? previousRoute) =>
+  void didPop(_i7.Route<dynamic>? route, _i7.Route<dynamic>? previousRoute) =>
       super.noSuchMethod(
         Invocation.method(#didPop, [route, previousRoute]),
         returnValueForMissingStub: null,
@@ -101,8 +114,8 @@ class MockNavigatorObserver extends _i1.Mock implements _i6.NavigatorObserver {
 
   @override
   void didRemove(
-    _i6.Route<dynamic>? route,
-    _i6.Route<dynamic>? previousRoute,
+    _i7.Route<dynamic>? route,
+    _i7.Route<dynamic>? previousRoute,
   ) => super.noSuchMethod(
     Invocation.method(#didRemove, [route, previousRoute]),
     returnValueForMissingStub: null,
@@ -110,8 +123,8 @@ class MockNavigatorObserver extends _i1.Mock implements _i6.NavigatorObserver {
 
   @override
   void didReplace({
-    _i6.Route<dynamic>? newRoute,
-    _i6.Route<dynamic>? oldRoute,
+    _i7.Route<dynamic>? newRoute,
+    _i7.Route<dynamic>? oldRoute,
   }) => super.noSuchMethod(
     Invocation.method(#didReplace, [], {
       #newRoute: newRoute,
@@ -122,8 +135,8 @@ class MockNavigatorObserver extends _i1.Mock implements _i6.NavigatorObserver {
 
   @override
   void didChangeTop(
-    _i6.Route<dynamic>? topRoute,
-    _i6.Route<dynamic>? previousTopRoute,
+    _i7.Route<dynamic>? topRoute,
+    _i7.Route<dynamic>? previousTopRoute,
   ) => super.noSuchMethod(
     Invocation.method(#didChangeTop, [topRoute, previousTopRoute]),
     returnValueForMissingStub: null,
@@ -131,8 +144,8 @@ class MockNavigatorObserver extends _i1.Mock implements _i6.NavigatorObserver {
 
   @override
   void didStartUserGesture(
-    _i6.Route<dynamic>? route,
-    _i6.Route<dynamic>? previousRoute,
+    _i7.Route<dynamic>? route,
+    _i7.Route<dynamic>? previousRoute,
   ) => super.noSuchMethod(
     Invocation.method(#didStartUserGesture, [route, previousRoute]),
     returnValueForMissingStub: null,
