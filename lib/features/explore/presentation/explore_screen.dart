@@ -15,7 +15,8 @@ import 'package:butterflies_of_ziro/providers/taxonomy_provider.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/butterfly_card.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/butterfly_list_tile.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/taxonomy_tree_selector.dart';
-import 'package:butterflies_of_ziro/features/explore/widgets/filter_dialog.dart'; // Import the new file
+import 'package:butterflies_of_ziro/features/explore/widgets/filter_dialog.dart';
+import 'package:butterflies_of_ziro/core/constants.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -25,7 +26,7 @@ class ExploreScreen extends ConsumerStatefulWidget {
 }
 
 class _ExploreScreenState extends ConsumerState<ExploreScreen> {
-  bool _isGridView = true;
+  ViewType _currentView = ViewType.grid; // Use the enum for state
 
   @override
   void initState() {
@@ -50,10 +51,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               showFilterDialog(
                 context: context,
                 ref: ref,
-                isGridView: _isGridView,
-                onViewChanged: (isGrid) {
+                currentViewType: _currentView, // Pass the enum
+                onViewChanged: (newViewType) {
+                  // Receive the enum
                   setState(() {
-                    _isGridView = isGrid;
+                    _currentView = newViewType;
                   });
                 },
               );
@@ -63,9 +65,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       ),
       body: filteredSpeciesAsync.when(
         data: (speciesList) {
-          return _isGridView
-              ? _buildGridView(speciesList)
-              : _buildListView(speciesList);
+          switch (_currentView) {
+            // Use a switch for cleaner logic
+            case ViewType.grid:
+              return _buildGridView(speciesList);
+            case ViewType.list:
+              return _buildListView(speciesList);
+          }
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),

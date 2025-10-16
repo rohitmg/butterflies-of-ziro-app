@@ -1,19 +1,19 @@
 // lib/data/models/taxonomy_node.dart
 
+import 'package:flutter/foundation.dart';
+
+@immutable // This annotation signals that the class is immutable.
 class TaxonomyNode {
   final String name;
-  final String level; // e.g. 'Family', 'Subfamily', 'Genus'
+  final String level;
   final List<TaxonomyNode> children;
-  TaxonomyNode? parent; // optional, assigned after construction
 
-  TaxonomyNode({
+  const TaxonomyNode({
     required this.name,
     required this.level,
     this.children = const [],
-  }) {
-    // Assign parent reference to children automatically
-    for (final child in children) {
-      child.parent = this;
-    }
-  }
+  });
+
+  // A helper method to get the parent of a node.
+  // This would be implemented in your tree builder logic, not the model itself.
 }

@@ -1,13 +1,10 @@
 // lib/features/explore/widgets/taxonomy_tree_selector.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:butterflies_of_ziro/data/models/taxonomy_node.dart';
 import 'package:butterflies_of_ziro/providers/filter_state.dart';
 import 'package:butterflies_of_ziro/core/app_colors.dart';
-import 'package:butterflies_of_ziro/data/models/taxonomy_node.dart';
-
-final _selectedNodeNameNotifier = ValueNotifier<String?>('Papilionoidea');
 
 class TaxonomyTreeSelector extends ConsumerStatefulWidget {
   final TaxonomyNode currentNode;
@@ -38,100 +35,65 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
   @override
   void initState() {
     super.initState();
+    // This part should handle the initial expansion
+    _initializeExpansion();
   }
 
   void _initializeExpansion() {
     _expandedNodes.clear();
-
-    // Ensure we start from the currently selected node (deepest filter)
-    TaxonomyNode? node = _findSelectedNode(widget.currentNode);
-
-    if (node == null) return;
-
-    final Map<String, String> selectedFilters = {};
-
-    while (node != null) {
-      _expandedNodes.add(node.name);
-
-      if (['Family', 'Subfamily', 'Tribe', 'Genus'].contains(node.level)) {
-        selectedFilters[node.level] = node.name;
+    List<String> path = [];
+    if (widget.localFilters.family != null) {
+      path.add(widget.localFilters.family!);
+      if (widget.localFilters.subfamily != null) {
+        path.add(widget.localFilters.subfamily!);
+        if (widget.localFilters.tribe != null) {
+          path.add(widget.localFilters.tribe!);
+          if (widget.localFilters.genus != null) {
+            path.add(widget.localFilters.genus!);
+          }
+        }
       }
-
-      node = node.parent;
     }
-
-    debugPrint('Selected filters: $selectedFilters');
-
-    setState(() {});
-  }
-
-  TaxonomyNode? _findSelectedNode(TaxonomyNode root) {
-    if (root.name == widget.selectedNodeNameNotifier.value) return root;
-    for (final child in root.children) {
-      final found = _findSelectedNode(child);
-      if (found != null) return found;
-    }
-    return null;
+    setState(() {
+      for (String nodeName in path) {
+        _expandedNodes.add(nodeName);
+      }
+    });
   }
 
   void _selectNode(TaxonomyNode? node) {
-    if (node == null) return;
-
-    final ancestry = _getAncestry(node);
-
-    // Construct new filter state
     FilterState newFilters = widget.localFilters;
-    for (final ancestor in ancestry) {
-      switch (ancestor.level) {
+    String? nodeName = node?.name;
+
+    if (node == null || node.level == 'Root') {
+      newFilters = const FilterState();
+      nodeName = 'Papilionoidea';
+    } else {
+      newFilters = newFilters.copyWith(
+        family: null,
+        subfamily: null,
+        tribe: null,
+        genus: null,
+      );
+
+      switch (node.level) {
         case 'Family':
-          newFilters = newFilters.copyWith(
-            family: ancestor.name,
-            subfamily: null,
-            tribe: null,
-            genus: null,
-          );
+          newFilters = newFilters.copyWith(family: node.name);
           break;
         case 'Subfamily':
-          newFilters = newFilters.copyWith(
-            subfamily: ancestor.name,
-            tribe: null,
-            genus: null,
-            family: ancestor.parent?.name ?? newFilters.family,
-          );
+          newFilters = newFilters.copyWith(subfamily: node.name);
           break;
         case 'Tribe':
-          newFilters = newFilters.copyWith(
-            tribe: ancestor.name,
-            genus: null,
-            subfamily: ancestor.parent?.name ?? newFilters.subfamily,
-            family: ancestor.parent?.parent?.name ?? newFilters.family,
-          );
+          newFilters = newFilters.copyWith(tribe: node.name);
           break;
         case 'Genus':
-          newFilters = newFilters.copyWith(
-            genus: ancestor.name,
-            tribe: ancestor.parent?.name ?? newFilters.tribe,
-            subfamily: ancestor.parent?.parent?.name ?? newFilters.subfamily,
-            family: ancestor.parent?.parent?.parent?.name ?? newFilters.family,
-          );
-          break;
-        default:
+          newFilters = newFilters.copyWith(genus: node.name);
           break;
       }
     }
 
     widget.onFiltersUpdated(newFilters);
-    widget.selectedNodeNameNotifier.value = node.name;
-  }
-
-  List<TaxonomyNode> _getAncestry(TaxonomyNode node) {
-    final List<TaxonomyNode> ancestry = [];
-    TaxonomyNode? current = node;
-    while (current != null) {
-      ancestry.insert(0, current); // insert at start
-      current = current.parent;
-    }
-    return ancestry;
+    widget.selectedNodeNameNotifier.value = nodeName;
   }
 
   void _toggleExpansion(String nodeName) {
@@ -150,40 +112,44 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
       return const SizedBox.shrink();
     }
 
-    _initializeExpansion();
-
-    final familyName = widget.localFilters.family;
-    final textColor = familyName != null
-        ? butterflyFamilyMap[familyName]?.base ?? Colors.black
-        : Colors.black;
-
     final nodeWidgets = <Widget>[];
 
-    // ROOT NODE
     if (widget.level == 0) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildNodeTile(
-            context,
-            TaxonomyNode(
-              name: 'Papilionoidea',
-              level: 'Root',
-              children: widget.currentNode.children,
-            ),
-            Colors.black,
-            hasChildren: true,
-            onTap: (node) => _selectNode(null),
-            onExpand: widget.currentNode.children.isNotEmpty
-                ? () => _toggleExpansion('Papilionoidea')
-                : null,
+      nodeWidgets.add(
+        _buildNodeTile(
+          context,
+          TaxonomyNode(
+            name: 'Papilionoidea',
+            level: 'Root',
+            children: widget.currentNode.children,
           ),
-          if (_expandedNodes.contains('Papilionoidea'))
-            Padding(
+          Colors.black,
+          onTap: (node) {
+            _selectNode(null);
+          },
+          onExpand: widget.currentNode.children.isNotEmpty
+              ? () => _toggleExpansion('Papilionoidea')
+              : null,
+          hasChildren: widget.currentNode.children.isNotEmpty,
+          verticalOffset: 0.0, // No vertical offset for root
+        ),
+      );
+
+      if (_expandedNodes.contains('Papilionoidea')) {
+        final children = widget.currentNode.children;
+        nodeWidgets.add(
+          CustomPaint(
+            painter: DottedLinePainter(
+              color: Colors.black.withOpacity(0.5),
+              numChildren: children.length,
+              verticalLineOffset: 24.0, // Adjusted offset
+              horizontalStubOffset: 12.0, // Adjusted offset
+            ),
+            child: Padding(
               padding: const EdgeInsets.only(left: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.currentNode.children.map((node) {
+                children: children.map((node) {
                   final familyColor =
                       butterflyFamilyMap[node.name]?.base ?? Colors.black;
                   return TaxonomyTreeSelector(
@@ -197,46 +163,61 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
                 }).toList(),
               ),
             ),
-        ],
-      );
-    }
-
-    // RECURSIVE CHILDREN
-    final children = widget.currentNode.children;
-    final isExpanded = _expandedNodes.contains(widget.currentNode.name);
-
-    nodeWidgets.add(
-      _buildNodeTile(
-        context,
-        widget.currentNode,
-        widget.baseColor,
-        onTap: _selectNode,
-        onExpand: children.isNotEmpty
-            ? () => _toggleExpansion(widget.currentNode.name)
-            : null,
-        hasChildren: children.isNotEmpty,
-      ),
-    );
-
-    if (children.isNotEmpty && isExpanded) {
-      nodeWidgets.add(
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children.map((node) {
-              return TaxonomyTreeSelector(
-                currentNode: node,
-                localFilters: widget.localFilters,
-                onFiltersUpdated: widget.onFiltersUpdated,
-                level: widget.level + 1,
-                baseColor: widget.baseColor,
-                selectedNodeNameNotifier: widget.selectedNodeNameNotifier,
-              );
-            }).toList(),
           ),
+        );
+      }
+    } else {
+      final children = widget.currentNode.children;
+      final isExpanded = _expandedNodes.contains(widget.currentNode.name);
+
+      nodeWidgets.add(
+        _buildNodeTile(
+          context,
+          widget.currentNode,
+          widget.baseColor,
+          onTap: (selectedNode) {
+            if (widget.selectedNodeNameNotifier.value == selectedNode.name) {
+              _selectNode(null);
+            } else {
+              _selectNode(selectedNode);
+            }
+          },
+          onExpand: children.isNotEmpty
+              ? () => _toggleExpansion(widget.currentNode.name)
+              : null,
+          hasChildren: children.isNotEmpty,
+          verticalOffset: 0.0, // No vertical offset for children
         ),
       );
+
+      if (children.isNotEmpty && isExpanded) {
+        nodeWidgets.add(
+          CustomPaint(
+            painter: DottedLinePainter(
+              color: widget.baseColor.withOpacity(0.5),
+              numChildren: children.length,
+              verticalLineOffset: 24.0, // Adjusted offset
+              horizontalStubOffset: 12.0, // Adjusted offset
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children.map((node) {
+                  return TaxonomyTreeSelector(
+                    currentNode: node,
+                    localFilters: widget.localFilters,
+                    onFiltersUpdated: widget.onFiltersUpdated,
+                    level: widget.level + 1,
+                    baseColor: widget.baseColor,
+                    selectedNodeNameNotifier: widget.selectedNodeNameNotifier,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      }
     }
 
     return Column(
@@ -252,6 +233,7 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
     required Function(TaxonomyNode) onTap,
     required Function()? onExpand,
     required bool hasChildren,
+    double verticalOffset = 0.0,
   }) {
     final isSelected = node.name == widget.selectedNodeNameNotifier.value;
     final isExpanded = _expandedNodes.contains(node.name);
@@ -259,6 +241,7 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
     return InkWell(
       onTap: () => onTap(node),
       child: Container(
+        height: 40.0, // Reduced height for less vertical padding
         color: isSelected ? textColor.withOpacity(0.15) : null,
         padding: EdgeInsets.only(left: 16.0 * widget.level),
         child: Row(
@@ -270,9 +253,16 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
                   color: Colors.grey,
                 ),
                 onPressed: onExpand,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 48,
+                  minHeight: 48,
+                ), // Match width of SizedBox
               )
             else
               const SizedBox(width: 48, height: 48),
+
             Expanded(
               child: Text(
                 node.name,
@@ -288,12 +278,14 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
 
 class DottedLinePainter extends CustomPainter {
   final Color color;
-  final int level;
+  final double verticalLineOffset;
+  final double horizontalStubOffset;
   final int numChildren;
 
   const DottedLinePainter({
     required this.color,
-    required this.level,
+    required this.verticalLineOffset,
+    required this.horizontalStubOffset,
     required this.numChildren,
   });
 
@@ -301,31 +293,31 @@ class DottedLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const double dashWidth = 3;
     const double dashSpace = 3;
+    const double rowHeight = 40.0; // Adjusted row height
     const double horizontalStubLength = 10;
-    const double verticalLineX = 10.0;
-    const double rowHeight = 48.0;
 
     final Paint paint = Paint()
       ..color = color
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
+    // 1. Draw the main vertical dotted line
     double startY = 0;
     while (startY < size.height) {
       canvas.drawLine(
-        Offset(verticalLineX, startY),
-        Offset(verticalLineX, startY + dashWidth),
+        Offset(verticalLineOffset, startY),
+        Offset(verticalLineOffset, startY + dashWidth),
         paint,
       );
       startY += dashWidth + dashSpace;
     }
 
-    final numChildrenInView = (size.height / rowHeight).floor();
-    for (int i = 0; i < numChildrenInView; i++) {
+    // 2. Draw horizontal stubs for each child node
+    for (int i = 0; i < numChildren; i++) {
       double horizontalY = (i * rowHeight) + (rowHeight / 2.0);
       canvas.drawLine(
-        Offset(verticalLineX, horizontalY),
-        Offset(verticalLineX + horizontalStubLength, horizontalY),
+        Offset(verticalLineOffset, horizontalY),
+        Offset(verticalLineOffset + horizontalStubLength, horizontalY),
         paint,
       );
     }
@@ -334,7 +326,8 @@ class DottedLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(DottedLinePainter oldDelegate) {
     return oldDelegate.color != color ||
-        oldDelegate.level != level ||
+        oldDelegate.verticalLineOffset != verticalLineOffset ||
+        oldDelegate.horizontalStubOffset != horizontalStubOffset ||
         oldDelegate.numChildren != numChildren;
   }
 }

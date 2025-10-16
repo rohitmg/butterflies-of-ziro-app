@@ -7,24 +7,20 @@ import 'package:butterflies_of_ziro/providers/filter_state.dart';
 import 'package:butterflies_of_ziro/providers/taxonomy_provider.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/taxonomy_tree_selector.dart';
 import 'package:butterflies_of_ziro/core/app_colors.dart';
+import 'package:butterflies_of_ziro/core/constants.dart';
 
 void showFilterDialog({
   required BuildContext context,
   required WidgetRef ref,
-  required bool isGridView,
-  required Function(bool) onViewChanged,
+  required ViewType currentViewType, // Correctly use the enum
+  required Function(ViewType) onViewChanged, // Correctly use the enum
 }) {
+  FilterState localFilters = ref.read(filterProvider);
   final taxonomyTree = ref.read(taxonomyProvider);
 
-  // Initialize local filter state once when the dialog opens
-  FilterState localFilters = ref.read(filterProvider);
-  final selectedNodeNameNotifier = ValueNotifier<String?>(
-    localFilters.genus ??
-        localFilters.tribe ??
-        localFilters.subfamily ??
-        localFilters.family ??
-        'Papilionoidea',
-  );
+  // Create a ValueNotifier to manage the selected node's name
+  final selectedNodeNameNotifier = ValueNotifier<String?>(localFilters.family);
+  ViewType _localViewType = currentViewType;
 
   showDialog(
     context: context,
@@ -45,20 +41,29 @@ void showFilterDialog({
                   const SizedBox(height: 8),
                   Row(
                     children: [
+                      // Pass the enum values directly
                       _buildViewButton(
                         context,
                         Icons.grid_view,
-                        true,
-                        isGridView,
-                        (isGrid) => onViewChanged(isGrid),
+                        ViewType.grid,
+                        _localViewType,
+                        (newType) {
+                          setState(() {
+                            _localViewType = newType;
+                          });
+                        },
                       ),
                       const SizedBox(width: 8),
                       _buildViewButton(
                         context,
                         Icons.list,
-                        false,
-                        isGridView,
-                        (isGrid) => onViewChanged(isGrid),
+                        ViewType.list,
+                        _localViewType,
+                        (newType) {
+                          setState(() {
+                            _localViewType = newType;
+                          });
+                        },
                       ),
                     ],
                   ),
@@ -72,13 +77,14 @@ void showFilterDialog({
                     child: SingleChildScrollView(
                       child: TaxonomyTreeSelector(
                         currentNode: taxonomyTree,
-                        selectedNodeNameNotifier: selectedNodeNameNotifier,
                         localFilters: localFilters,
                         onFiltersUpdated: (newFilters) {
                           setState(() {
                             localFilters = newFilters;
                           });
                         },
+                        // Pass the local ValueNotifier down to the tree selector
+                        selectedNodeNameNotifier: selectedNodeNameNotifier,
                         baseColor: Colors.black,
                       ),
                     ),
@@ -89,15 +95,17 @@ void showFilterDialog({
                     children: [
                       TextButton(
                         onPressed: () {
+                          // Clear the local state and the ValueNotifier
+                          selectedNodeNameNotifier.value = null;
                           setState(() {
                             localFilters = const FilterState();
-                            selectedNodeNameNotifier.value = null;
                           });
                         },
                         child: const Text('Clear'),
                       ),
                       TextButton(
                         onPressed: () {
+                          // Only apply filters when this button is pressed
                           ref
                               .read(filterProvider.notifier)
                               .updateFromState(localFilters);
@@ -120,14 +128,14 @@ void showFilterDialog({
 Widget _buildViewButton(
   BuildContext context,
   IconData icon,
-  bool isGrid,
-  bool currentView,
-  Function(bool) onChanged,
+  ViewType viewType, // Use the new enum
+  ViewType currentView, // Use the new enum
+  Function(ViewType) onChanged, // Use the new enum
 ) {
   return Expanded(
     child: Container(
       decoration: BoxDecoration(
-        color: currentView == isGrid
+        color: currentView == viewType
             ? Theme.of(context).primaryColor.withOpacity(0.2)
             : null,
         borderRadius: BorderRadius.circular(8.0),
@@ -135,7 +143,7 @@ Widget _buildViewButton(
       child: IconButton(
         icon: Icon(icon),
         onPressed: () {
-          onChanged(isGrid);
+          onChanged(viewType);
         },
       ),
     ),
