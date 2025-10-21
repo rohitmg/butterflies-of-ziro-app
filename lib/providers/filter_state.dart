@@ -17,5 +17,14 @@ class FilterState with _$FilterState {
     @Default(null) String? size,
     @Default(null) String? habitat,
     @Default(null) String? altitude,
+    @Default(null) int? sizeMin,
+    @Default(null) int? sizeMax,
+
+    @Default(null) int? altitudeMin,
+    @Default(null) int? altitudeMax,
+
+    // --- SEASONAL RANGES (Using indices 1-12) ---
+    @Default(null) int? seasonStartMonth, // 1=Jan, 12=Dec
+    @Default(null) int? seasonEndMonth,   // 1=Jan, 12=Dec
   }) = _FilterState;
 }

@@ -57,4 +57,26 @@ class SpeciesModel {
       photographers: map['photographers'] != null ? (map['photographers'] as String).split(',').toList() : [],
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'commonName': commonName,
+      'scientificName': scientificName,
+      'family': family,
+      'subfamily': subfamily,
+      'tribe': tribe,
+      'genus': genus,
+      'season': season,
+      'size': size,
+      'habitat': habitat,
+      'altitude': altitude,
+      'description': description,
+      'lifeCycle': lifeCycle,
+      'hostPlants': hostPlants,
+      // Note: Images and Photographers are lists/sets, often excluded or converted to strings for raw DB storage
+      'images': images, 
+      'photographers': photographers,
+    };
+  }
 }

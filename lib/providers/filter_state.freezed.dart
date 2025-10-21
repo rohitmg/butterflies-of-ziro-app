@@ -26,6 +26,14 @@ mixin _$FilterState {
   String? get size => throw _privateConstructorUsedError;
   String? get habitat => throw _privateConstructorUsedError;
   String? get altitude => throw _privateConstructorUsedError;
+  int? get sizeMin => throw _privateConstructorUsedError;
+  int? get sizeMax => throw _privateConstructorUsedError;
+  int? get altitudeMin => throw _privateConstructorUsedError;
+  int? get altitudeMax =>
+      throw _privateConstructorUsedError; // --- SEASONAL RANGES (Using indices 1-12) ---
+  int? get seasonStartMonth =>
+      throw _privateConstructorUsedError; // 1=Jan, 12=Dec
+  int? get seasonEndMonth => throw _privateConstructorUsedError;
 
   /// Create a copy of FilterState
   /// with the given fields replaced by the non-null parameter values.
@@ -51,6 +59,12 @@ abstract class $FilterStateCopyWith<$Res> {
     String? size,
     String? habitat,
     String? altitude,
+    int? sizeMin,
+    int? sizeMax,
+    int? altitudeMin,
+    int? altitudeMax,
+    int? seasonStartMonth,
+    int? seasonEndMonth,
   });
 }
 
@@ -78,6 +92,12 @@ class _$FilterStateCopyWithImpl<$Res, $Val extends FilterState>
     Object? size = freezed,
     Object? habitat = freezed,
     Object? altitude = freezed,
+    Object? sizeMin = freezed,
+    Object? sizeMax = freezed,
+    Object? altitudeMin = freezed,
+    Object? altitudeMax = freezed,
+    Object? seasonStartMonth = freezed,
+    Object? seasonEndMonth = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -117,6 +137,30 @@ class _$FilterStateCopyWithImpl<$Res, $Val extends FilterState>
                 ? _value.altitude
                 : altitude // ignore: cast_nullable_to_non_nullable
                       as String?,
+            sizeMin: freezed == sizeMin
+                ? _value.sizeMin
+                : sizeMin // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            sizeMax: freezed == sizeMax
+                ? _value.sizeMax
+                : sizeMax // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            altitudeMin: freezed == altitudeMin
+                ? _value.altitudeMin
+                : altitudeMin // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            altitudeMax: freezed == altitudeMax
+                ? _value.altitudeMax
+                : altitudeMax // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            seasonStartMonth: freezed == seasonStartMonth
+                ? _value.seasonStartMonth
+                : seasonStartMonth // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            seasonEndMonth: freezed == seasonEndMonth
+                ? _value.seasonEndMonth
+                : seasonEndMonth // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -142,6 +186,12 @@ abstract class _$$FilterStateImplCopyWith<$Res>
     String? size,
     String? habitat,
     String? altitude,
+    int? sizeMin,
+    int? sizeMax,
+    int? altitudeMin,
+    int? altitudeMax,
+    int? seasonStartMonth,
+    int? seasonEndMonth,
   });
 }
 
@@ -168,6 +218,12 @@ class __$$FilterStateImplCopyWithImpl<$Res>
     Object? size = freezed,
     Object? habitat = freezed,
     Object? altitude = freezed,
+    Object? sizeMin = freezed,
+    Object? sizeMax = freezed,
+    Object? altitudeMin = freezed,
+    Object? altitudeMax = freezed,
+    Object? seasonStartMonth = freezed,
+    Object? seasonEndMonth = freezed,
   }) {
     return _then(
       _$FilterStateImpl(
@@ -207,6 +263,30 @@ class __$$FilterStateImplCopyWithImpl<$Res>
             ? _value.altitude
             : altitude // ignore: cast_nullable_to_non_nullable
                   as String?,
+        sizeMin: freezed == sizeMin
+            ? _value.sizeMin
+            : sizeMin // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        sizeMax: freezed == sizeMax
+            ? _value.sizeMax
+            : sizeMax // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        altitudeMin: freezed == altitudeMin
+            ? _value.altitudeMin
+            : altitudeMin // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        altitudeMax: freezed == altitudeMax
+            ? _value.altitudeMax
+            : altitudeMax // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        seasonStartMonth: freezed == seasonStartMonth
+            ? _value.seasonStartMonth
+            : seasonStartMonth // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        seasonEndMonth: freezed == seasonEndMonth
+            ? _value.seasonEndMonth
+            : seasonEndMonth // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -225,6 +305,12 @@ class _$FilterStateImpl implements _FilterState {
     this.size = null,
     this.habitat = null,
     this.altitude = null,
+    this.sizeMin = null,
+    this.sizeMax = null,
+    this.altitudeMin = null,
+    this.altitudeMax = null,
+    this.seasonStartMonth = null,
+    this.seasonEndMonth = null,
   });
 
   @override
@@ -254,10 +340,30 @@ class _$FilterStateImpl implements _FilterState {
   @override
   @JsonKey()
   final String? altitude;
+  @override
+  @JsonKey()
+  final int? sizeMin;
+  @override
+  @JsonKey()
+  final int? sizeMax;
+  @override
+  @JsonKey()
+  final int? altitudeMin;
+  @override
+  @JsonKey()
+  final int? altitudeMax;
+  // --- SEASONAL RANGES (Using indices 1-12) ---
+  @override
+  @JsonKey()
+  final int? seasonStartMonth;
+  // 1=Jan, 12=Dec
+  @override
+  @JsonKey()
+  final int? seasonEndMonth;
 
   @override
   String toString() {
-    return 'FilterState(superfamily: $superfamily, family: $family, subfamily: $subfamily, tribe: $tribe, genus: $genus, season: $season, size: $size, habitat: $habitat, altitude: $altitude)';
+    return 'FilterState(superfamily: $superfamily, family: $family, subfamily: $subfamily, tribe: $tribe, genus: $genus, season: $season, size: $size, habitat: $habitat, altitude: $altitude, sizeMin: $sizeMin, sizeMax: $sizeMax, altitudeMin: $altitudeMin, altitudeMax: $altitudeMax, seasonStartMonth: $seasonStartMonth, seasonEndMonth: $seasonEndMonth)';
   }
 
   @override
@@ -276,7 +382,17 @@ class _$FilterStateImpl implements _FilterState {
             (identical(other.size, size) || other.size == size) &&
             (identical(other.habitat, habitat) || other.habitat == habitat) &&
             (identical(other.altitude, altitude) ||
-                other.altitude == altitude));
+                other.altitude == altitude) &&
+            (identical(other.sizeMin, sizeMin) || other.sizeMin == sizeMin) &&
+            (identical(other.sizeMax, sizeMax) || other.sizeMax == sizeMax) &&
+            (identical(other.altitudeMin, altitudeMin) ||
+                other.altitudeMin == altitudeMin) &&
+            (identical(other.altitudeMax, altitudeMax) ||
+                other.altitudeMax == altitudeMax) &&
+            (identical(other.seasonStartMonth, seasonStartMonth) ||
+                other.seasonStartMonth == seasonStartMonth) &&
+            (identical(other.seasonEndMonth, seasonEndMonth) ||
+                other.seasonEndMonth == seasonEndMonth));
   }
 
   @override
@@ -291,6 +407,12 @@ class _$FilterStateImpl implements _FilterState {
     size,
     habitat,
     altitude,
+    sizeMin,
+    sizeMax,
+    altitudeMin,
+    altitudeMax,
+    seasonStartMonth,
+    seasonEndMonth,
   );
 
   /// Create a copy of FilterState
@@ -313,6 +435,12 @@ abstract class _FilterState implements FilterState {
     final String? size,
     final String? habitat,
     final String? altitude,
+    final int? sizeMin,
+    final int? sizeMax,
+    final int? altitudeMin,
+    final int? altitudeMax,
+    final int? seasonStartMonth,
+    final int? seasonEndMonth,
   }) = _$FilterStateImpl;
 
   @override
@@ -333,6 +461,18 @@ abstract class _FilterState implements FilterState {
   String? get habitat;
   @override
   String? get altitude;
+  @override
+  int? get sizeMin;
+  @override
+  int? get sizeMax;
+  @override
+  int? get altitudeMin;
+  @override
+  int? get altitudeMax; // --- SEASONAL RANGES (Using indices 1-12) ---
+  @override
+  int? get seasonStartMonth; // 1=Jan, 12=Dec
+  @override
+  int? get seasonEndMonth;
 
   /// Create a copy of FilterState
   /// with the given fields replaced by the non-null parameter values.
