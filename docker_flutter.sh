@@ -67,7 +67,6 @@ esac
 
 # Run build as your current user to avoid permission conflicts
 docker run --rm \
-  --user "$(id -u):$(id -g)" \
   -v "$PROJECT_VOLUME" \
   -v "$BUILD_VOLUME" \
   -v "$GRADLE_VOLUME" \
@@ -76,6 +75,9 @@ docker run --rm \
   --memory $MEM_LIMIT \
   "$IMAGE_NAME" \
   bash -c "
+    # FIX: Add safe directory configuration for Git (required in Docker/CI environments)
+    git config --global --add safe.directory /usr/local/flutter && \
+    
     flutter clean && \
     $BUILD_CMD
   "

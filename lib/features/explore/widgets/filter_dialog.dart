@@ -39,32 +39,29 @@ void showFilterDialog({
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Pass the enum values directly
-                      _buildViewButton(
-                        context,
-                        Icons.grid_view,
-                        ViewType.grid,
-                        _localViewType,
-                        (newType) {
-                          setState(() {
-                            _localViewType = newType;
-                          });
-                        },
+                  ToggleButtons(
+                    isSelected: ViewType.values
+                        .map((type) => type == _localViewType)
+                        .toList(),
+                    onPressed: (index) {
+                      setState(() {
+                        _localViewType = ViewType.values[index];
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8.0),
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Icon(Icons.grid_view),
                       ),
-                      const SizedBox(width: 8),
-                      _buildViewButton(
-                        context,
-                        Icons.list,
-                        ViewType.list,
-                        _localViewType,
-                        (newType) {
-                          setState(() {
-                            _localViewType = newType;
-                          });
-                        },
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Icon(Icons.list),
                       ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Icon(Icons.photo_library_outlined),
+                      ), // Light Box Icon
                     ],
                   ),
                   const Divider(),
@@ -105,7 +102,7 @@ void showFilterDialog({
                       ),
                       TextButton(
                         onPressed: () {
-                          // Only apply filters when this button is pressed
+                          onViewChanged(_localViewType);
                           ref
                               .read(filterProvider.notifier)
                               .updateFromState(localFilters);

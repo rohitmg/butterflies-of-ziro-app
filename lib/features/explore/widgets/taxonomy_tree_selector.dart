@@ -6,22 +6,28 @@ import 'package:butterflies_of_ziro/data/models/taxonomy_node.dart';
 import 'package:butterflies_of_ziro/providers/filter_state.dart';
 import 'package:butterflies_of_ziro/core/app_colors.dart';
 
+// --- CONSTANTS ---
+const double _treeNodeIconSize = 16.0;
+const double _treeNodeIconWidth = 40.0;
+const double _treeNodeRowHeight = 40.0;
+const double _treeNodeIndentation = 16.0;
+
 class TaxonomyTreeSelector extends ConsumerStatefulWidget {
   final TaxonomyNode currentNode;
   final FilterState localFilters;
   final Function(FilterState) onFiltersUpdated;
+  final ValueNotifier<String?> selectedNodeNameNotifier;
   final int level;
   final Color baseColor;
-  final ValueNotifier<String?> selectedNodeNameNotifier;
 
   const TaxonomyTreeSelector({
     super.key,
     required this.currentNode,
     required this.localFilters,
     required this.onFiltersUpdated,
+    required this.selectedNodeNameNotifier,
     this.level = 0,
     required this.baseColor,
-    required this.selectedNodeNameNotifier,
   });
 
   @override
@@ -35,11 +41,14 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
   @override
   void initState() {
     super.initState();
-    // This part should handle the initial expansion
-    _initializeExpansion();
+    // Initialize expansion state only on the root element
+    if (widget.level == 0) {
+      _initializeExpansion();
+    }
   }
 
   void _initializeExpansion() {
+    // Logic to automatically expand the path to the currently selected filter
     _expandedNodes.clear();
     List<String> path = [];
     if (widget.localFilters.family != null) {
@@ -55,8 +64,9 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
       }
     }
     setState(() {
-      for (String nodeName in path) {
-        _expandedNodes.add(nodeName);
+      _expandedNodes.addAll(path);
+      if (widget.currentNode.level == 'Root') {
+        _expandedNodes.add(widget.currentNode.name);
       }
     });
   }
@@ -65,16 +75,13 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
     FilterState newFilters = widget.localFilters;
     String? nodeName = node?.name;
 
+    // 1. Determine the NEW FilterState based on the selected node
     if (node == null || node.level == 'Root') {
       newFilters = const FilterState();
       nodeName = 'Papilionoidea';
     } else {
-      newFilters = newFilters.copyWith(
-        family: null,
-        subfamily: null,
-        tribe: null,
-        genus: null,
-      );
+      // Create a fresh filter state to avoid accidental inheritance
+      newFilters = const FilterState();
 
       switch (node.level) {
         case 'Family':
@@ -92,6 +99,7 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
       }
     }
 
+    // 2. Update the external (dialog) state and notifier
     widget.onFiltersUpdated(newFilters);
     widget.selectedNodeNameNotifier.value = nodeName;
   }
@@ -112,117 +120,67 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
       return const SizedBox.shrink();
     }
 
-    final nodeWidgets = <Widget>[];
-
-    if (widget.level == 0) {
-      nodeWidgets.add(
-        _buildNodeTile(
-          context,
-          TaxonomyNode(
-            name: 'Papilionoidea',
-            level: 'Root',
-            children: widget.currentNode.children,
-          ),
-          Colors.black,
-          onTap: (node) {
-            _selectNode(null);
-          },
-          onExpand: widget.currentNode.children.isNotEmpty
-              ? () => _toggleExpansion('Papilionoidea')
-              : null,
-          hasChildren: widget.currentNode.children.isNotEmpty,
-          verticalOffset: 0.0, // No vertical offset for root
+    final List<TaxonomyNode> nodesToDisplay = [
+      if (widget.level == 0)
+        TaxonomyNode(
+          name: 'Papilionoidea',
+          level: 'Root',
+          children: widget.currentNode.children,
         ),
-      );
-
-      if (_expandedNodes.contains('Papilionoidea')) {
-        final children = widget.currentNode.children;
-        nodeWidgets.add(
-          CustomPaint(
-            painter: DottedLinePainter(
-              color: Colors.black.withOpacity(0.5),
-              numChildren: children.length,
-              verticalLineOffset: 24.0, // Adjusted offset
-              horizontalStubOffset: 12.0, // Adjusted offset
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children.map((node) {
-                  final familyColor =
-                      butterflyFamilyMap[node.name]?.base ?? Colors.black;
-                  return TaxonomyTreeSelector(
-                    currentNode: node,
-                    localFilters: widget.localFilters,
-                    onFiltersUpdated: widget.onFiltersUpdated,
-                    level: 1,
-                    baseColor: familyColor,
-                    selectedNodeNameNotifier: widget.selectedNodeNameNotifier,
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        );
-      }
-    } else {
-      final children = widget.currentNode.children;
-      final isExpanded = _expandedNodes.contains(widget.currentNode.name);
-
-      nodeWidgets.add(
-        _buildNodeTile(
-          context,
-          widget.currentNode,
-          widget.baseColor,
-          onTap: (selectedNode) {
-            if (widget.selectedNodeNameNotifier.value == selectedNode.name) {
-              _selectNode(null);
-            } else {
-              _selectNode(selectedNode);
-            }
-          },
-          onExpand: children.isNotEmpty
-              ? () => _toggleExpansion(widget.currentNode.name)
-              : null,
-          hasChildren: children.isNotEmpty,
-          verticalOffset: 0.0, // No vertical offset for children
-        ),
-      );
-
-      if (children.isNotEmpty && isExpanded) {
-        nodeWidgets.add(
-          CustomPaint(
-            painter: DottedLinePainter(
-              color: widget.baseColor.withOpacity(0.5),
-              numChildren: children.length,
-              verticalLineOffset: 24.0, // Adjusted offset
-              horizontalStubOffset: 12.0, // Adjusted offset
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children.map((node) {
-                  return TaxonomyTreeSelector(
-                    currentNode: node,
-                    localFilters: widget.localFilters,
-                    onFiltersUpdated: widget.onFiltersUpdated,
-                    level: widget.level + 1,
-                    baseColor: widget.baseColor,
-                    selectedNodeNameNotifier: widget.selectedNodeNameNotifier,
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        );
-      }
-    }
+      ...widget.currentNode.children,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: nodeWidgets,
+      children: nodesToDisplay.map((node) {
+        final isExpanded = _expandedNodes.contains(node.name);
+        final hasSubChildren = node.children.isNotEmpty;
+
+        // Determine the color for the next level's children
+        final Color nextLevelColor = node.level == 'Family'
+            ? butterflyFamilyMap[node.name]?.base ?? Colors.black
+            : widget.baseColor;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Node Tile ---
+            _buildNodeTile(
+              context,
+              node,
+              widget.baseColor,
+              onTap: (selectedNode) {
+                // Tapping selects the node
+                if (widget.selectedNodeNameNotifier.value ==
+                    selectedNode.name) {
+                  _selectNode(null); // Deselect
+                } else {
+                  _selectNode(selectedNode);
+                }
+              },
+              onExpand: hasSubChildren
+                  ? () => _toggleExpansion(node.name)
+                  : null,
+              hasChildren: hasSubChildren,
+            ),
+
+            // --- Recursive Children Container ---
+            if (hasSubChildren && isExpanded)
+              Padding(
+                padding: EdgeInsets
+                    .zero, // Padding is handled internally by the child widget's level
+                child: TaxonomyTreeSelector(
+                  currentNode: node,
+                  localFilters: widget.localFilters,
+                  onFiltersUpdated: widget.onFiltersUpdated,
+                  level: widget.level + 1,
+                  baseColor: nextLevelColor, // Pass the color down
+                  selectedNodeNameNotifier: widget.selectedNodeNameNotifier,
+                ),
+              ),
+          ],
+        );
+      }).toList(),
     );
   }
 
@@ -233,7 +191,6 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
     required Function(TaxonomyNode) onTap,
     required Function()? onExpand,
     required bool hasChildren,
-    double verticalOffset = 0.0,
   }) {
     final isSelected = node.name == widget.selectedNodeNameNotifier.value;
     final isExpanded = _expandedNodes.contains(node.name);
@@ -241,28 +198,48 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
     return InkWell(
       onTap: () => onTap(node),
       child: Container(
-        height: 40.0, // Reduced height for less vertical padding
+        height: _treeNodeRowHeight,
         color: isSelected ? textColor.withOpacity(0.15) : null,
-        padding: EdgeInsets.only(left: 16.0 * widget.level),
+        padding: EdgeInsets.only(left: _treeNodeIndentation * widget.level),
         child: Row(
           children: [
-            if (onExpand != null)
-              IconButton(
-                icon: Icon(
-                  isExpanded ? Icons.remove : Icons.add,
-                  color: Colors.grey,
-                ),
-                onPressed: onExpand,
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 48,
-                  minHeight: 48,
-                ), // Match width of SizedBox
-              )
-            else
-              const SizedBox(width: 48, height: 48),
+            // ICON/EXPAND BUTTON (Fixed Width)
+            SizedBox(
+              width: _treeNodeIconWidth,
+              height: _treeNodeRowHeight,
+              child: Center(
+                child: onExpand != null
+                    ? Container(
+                        // Subtle background circle
+                        width: _treeNodeIconWidth * 0.7,
+                        height: _treeNodeIconWidth * 0.7,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            isExpanded ? Icons.remove : Icons.add,
+                            color: Colors.grey.shade700,
+                            size: _treeNodeIconSize,
+                          ),
+                          onPressed: onExpand,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints.tightFor(
+                            width: _treeNodeIconWidth * 0.7,
+                            height: _treeNodeIconWidth * 0.7,
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                        width: _treeNodeIconWidth,
+                        height: _treeNodeRowHeight,
+                      ), // Placeholder
+              ),
+            ),
 
+            // TEXT
             Expanded(
               child: Text(
                 node.name,
@@ -273,61 +250,5 @@ class _TaxonomyTreeSelectorState extends ConsumerState<TaxonomyTreeSelector> {
         ),
       ),
     );
-  }
-}
-
-class DottedLinePainter extends CustomPainter {
-  final Color color;
-  final double verticalLineOffset;
-  final double horizontalStubOffset;
-  final int numChildren;
-
-  const DottedLinePainter({
-    required this.color,
-    required this.verticalLineOffset,
-    required this.horizontalStubOffset,
-    required this.numChildren,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const double dashWidth = 3;
-    const double dashSpace = 3;
-    const double rowHeight = 40.0; // Adjusted row height
-    const double horizontalStubLength = 10;
-
-    final Paint paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    // 1. Draw the main vertical dotted line
-    double startY = 0;
-    while (startY < size.height) {
-      canvas.drawLine(
-        Offset(verticalLineOffset, startY),
-        Offset(verticalLineOffset, startY + dashWidth),
-        paint,
-      );
-      startY += dashWidth + dashSpace;
-    }
-
-    // 2. Draw horizontal stubs for each child node
-    for (int i = 0; i < numChildren; i++) {
-      double horizontalY = (i * rowHeight) + (rowHeight / 2.0);
-      canvas.drawLine(
-        Offset(verticalLineOffset, horizontalY),
-        Offset(verticalLineOffset + horizontalStubLength, horizontalY),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(DottedLinePainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.verticalLineOffset != verticalLineOffset ||
-        oldDelegate.horizontalStubOffset != horizontalStubOffset ||
-        oldDelegate.numChildren != numChildren;
   }
 }

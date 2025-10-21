@@ -68,6 +68,7 @@ flutter:
   assets:
     - assets/db/butterflies.db
     - assets/images/butterflies/
+    - assets/images/size.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

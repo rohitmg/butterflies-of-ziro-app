@@ -14,6 +14,7 @@ import 'package:butterflies_of_ziro/providers/taxonomy_provider.dart';
 
 import 'package:butterflies_of_ziro/features/explore/widgets/butterfly_card.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/butterfly_list_tile.dart';
+import 'package:butterflies_of_ziro/features/explore/presentation/species_browser_screen.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/taxonomy_tree_selector.dart';
 import 'package:butterflies_of_ziro/features/explore/widgets/filter_dialog.dart';
 import 'package:butterflies_of_ziro/core/constants.dart';
@@ -65,12 +66,19 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       ),
       body: filteredSpeciesAsync.when(
         data: (speciesList) {
+          if (speciesList.isEmpty) {
+            return const Center(
+              child: Text("No butterflies match your current filters."),
+            );
+          }
           switch (_currentView) {
             // Use a switch for cleaner logic
             case ViewType.grid:
               return _buildGridView(speciesList);
             case ViewType.list:
               return _buildListView(speciesList);
+            case ViewType.browser:
+              return SpeciesBrowserScreen(speciesList: speciesList);
           }
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -80,7 +88,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   Widget _buildGridView(List<SpeciesModel> speciesList) {
-    // ... (Existing GridView code) ...
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -109,7 +116,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   Widget _buildListView(List<SpeciesModel> speciesList) {
-    // ... (Existing ListView code) ...
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: speciesList.length,
