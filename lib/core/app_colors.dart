@@ -14,6 +14,7 @@ class ButterflyFamilyColors {
     "dull": _adjustColor(base, saturation: -0.2, lightness: 0.1),
     "light": _adjustColor(base, lightness: 0.25),
     "dark": _adjustColor(base, lightness: -0.25),
+    "lightest": _adjustColor(base, saturation: -0.5, lightness: 0.4),
   };
 
   /// Color adjustment helper similar to HSL-based Vue logic.

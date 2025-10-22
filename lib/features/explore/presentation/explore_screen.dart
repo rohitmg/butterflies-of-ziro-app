@@ -88,11 +88,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   }
 
   Widget _buildGridView(List<SpeciesModel> speciesList) {
+    const int currentColumnCount = 2;
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+        crossAxisCount: currentColumnCount,
         crossAxisSpacing: 8.0,
-        mainAxisSpacing: 8.0,
+        mainAxisSpacing: 10.0,
       ),
       padding: const EdgeInsets.all(8.0),
       itemCount: speciesList.length,
@@ -109,7 +110,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               ),
             );
           },
-          child: ButterflyCard(species: species, imageUrl: imageUrl),
+          child: ButterflyCard(species: species, imageUrl: imageUrl, columnCount: currentColumnCount),
         );
       },
     );
