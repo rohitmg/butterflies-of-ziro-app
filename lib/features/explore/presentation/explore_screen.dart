@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:butterflies_of_ziro/data/models/species_model.dart';
 import 'package:butterflies_of_ziro/providers/explore_provider.dart';
@@ -103,14 +104,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ? 'assets/images/butterflies/${species.images.first}'
             : null;
         return InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => SpeciesDetailScreen(species: species),
-              ),
-            );
-          },
-          child: ButterflyCard(species: species, imageUrl: imageUrl, columnCount: currentColumnCount),
+          onTap: () => _navigateToDetail(
+            context,
+            speciesList,
+            index,
+          ), // Call helper function
+          child: ButterflyCard(
+            species: species,
+            imageUrl: imageUrl,
+            columnCount: currentColumnCount,
+          ),
         );
       },
     );
@@ -122,8 +125,30 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
       itemCount: speciesList.length,
       itemBuilder: (context, index) {
         final species = speciesList[index];
-        return ButterflyListTile(species: species);
+
+        // UPDATED: Pass the full list and the index to the tile
+        return ButterflyListTile(
+          species: species,
+          speciesList: speciesList,
+          index: index,
+        );
       },
+    );
+  }
+
+  void _navigateToDetail(
+    BuildContext context,
+    List<SpeciesModel> speciesList,
+    int index,
+  ) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SpeciesDetailScreen(
+          speciesList: speciesList, // Pass the full list
+          initialIndex: index, // Pass the starting index
+          // No need to pass species or onIndexChanged!
+        ),
+      ),
     );
   }
 }

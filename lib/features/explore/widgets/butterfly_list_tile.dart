@@ -7,10 +7,14 @@ import 'package:butterflies_of_ziro/features/species_details/presentation/specie
 
 class ButterflyListTile extends StatelessWidget {
   final SpeciesModel species;
+  final List<SpeciesModel> speciesList; // NEW: Full list
+  final int index; // NEW: Current index
 
   const ButterflyListTile({
     Key? key,
     required this.species,
+    required this.speciesList, // Required
+    required this.index, // Required
   }) : super(key: key);
 
   @override
@@ -26,9 +30,13 @@ class ButterflyListTile extends StatelessWidget {
 
     return InkWell(
       onTap: () {
+        // UPDATED: Pass the full list and the starting index
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => SpeciesDetailScreen(species: species),
+            builder: (context) => SpeciesDetailScreen(
+              speciesList: speciesList,
+              initialIndex: index,
+            ),
           ),
         );
       },

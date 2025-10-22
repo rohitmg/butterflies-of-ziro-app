@@ -42,13 +42,13 @@ class ButterflyCard extends StatelessWidget {
     final bool hideText = columnCount >= 4;
 
     return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => SpeciesDetailScreen(species: species),
-          ),
-        );
-      },
+      // onTap: () {
+      //   Navigator.of(context).push(
+      //     MaterialPageRoute(
+      //       builder: (_) => SpeciesDetailScreen(species: species),
+      //     ),
+      //   );
+      // },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: _cardBorderRadius,
